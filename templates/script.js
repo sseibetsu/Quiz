@@ -65,14 +65,32 @@ document.onkeydown = function (e) {
 };
 
 // 3. Отслеживание ухода с вкладки
-document.addEventListener("visibilitychange", () => {
-  if (quizStarted && document.hidden) {
+function handleLossOfFocus() {
+  if (quizStarted) {
     tabSwitches++;
     document.title = `⚠️ Внимание! (${tabSwitches})`;
-    // Можно добавить визуальное предупреждение
-    // alert("Пожалуйста, не переключайтесь между вкладками!");
-  } else if (quizStarted && !document.hidden) {
+    // Можно покрасить фон в красный на секунду для предупреждения
+    document.body.style.backgroundColor = "#3a0000";
+    setTimeout(() => document.body.style.backgroundColor = "", 500);
+  }
+}
+
+function handleGainFocus() {
+  if (quizStarted) {
     document.title = "Квиз: ИБ";
+  }
+}
+
+// Срабатывает при Alt+Tab или клике в другое окно
+window.addEventListener("blur", handleLossOfFocus);
+window.addEventListener("focus", handleGainFocus);
+
+// Срабатывает при сворачивании браузера или переключении вкладки
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    handleLossOfFocus();
+  } else {
+    handleGainFocus();
   }
 });
 
@@ -126,6 +144,14 @@ async function loginAndStart() {
 }
 
 function startQuiz() {
+  setInterval(() => {
+    const start = performance.now();
+    debugger; // Останавливает выполнение кода, если консоль открыта
+    const end = performance.now();
+    if (end - start > 100) {
+      alert("Закройте панель разработчика, чтобы продолжить!");
+    }
+  }, 1000);
   current = 0;
   score = 0;
   tabSwitches = 0; // Сброс
