@@ -240,3 +240,26 @@ function showResults() {
   const restartBtn = document.querySelector('#results-screen .btn-primary');
   if (restartBtn) restartBtn.style.display = 'none';
 }
+
+// --- ИНИЦИАЛИЗАЦИЯ СЧЕТЧИКОВ ---
+function initCounters() {
+  const total = questions.length;
+
+  // Обновляем все места в HTML, где должно быть общее количество
+  const idsToUpdate = [
+    'total-count-subtitle',
+    'total-count-meta',
+    'total-count-quiz',
+    'total-count-result'
+  ];
+
+  idsToUpdate.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = total;
+  });
+}
+
+// Запускаем сразу при загрузке скрипта
+document.addEventListener('DOMContentLoaded', initCounters);
+// На случай, если DOMContentLoaded уже прошел (для надежности)
+initCounters();

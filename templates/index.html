@@ -24,9 +24,10 @@
         </div>
       </div>
       <h1 class="title"><span class="text-primary">Квиз:</span> Угрозы и Риски ИБ</h1>
-      <p class="subtitle">Проверь свои знания перед практикой. <span class="text-lavender">5 вопросов</span>, 1 цель —
-        <span class="text-primary">безопасность</span>.
+      <p class="subtitle">Проверь свои знания перед практикой. <span class="text-lavender"><span
+            id="total-count-subtitle">0</span> вопросов</span>, 1 цель — <span class="text-primary">безопасность</span>.
       </p>
+
 
       <div class="input-container">
         <input type="text" id="username-input" placeholder="Введите Фамилию и Имя" autocomplete="off" />
@@ -35,7 +36,7 @@
       <button class="btn-primary soft-glow" onclick="loginAndStart()">Начать →</button>
 
       <div class="meta-info">
-        <div class="meta-item"><span class="dot dot-primary"></span>5 вопросов</div>
+        <div class="meta-item"><span class="dot dot-primary"></span><span id="total-count-meta">0</span> вопросов</div>
         <div class="meta-item"><span class="dot dot-accent"></span>Мгновенная проверка</div>
       </div>
     </div>
@@ -43,8 +44,8 @@
     <div id="quiz-screen" class="screen">
       <div class="progress-container">
         <div class="progress-header">
-          <span class="progress-label">Вопрос <span id="current-num" class="text-primary">1</span> из 5</span>
-          <span class="progress-percent" id="progress-percent">20%</span>
+          <span class="progress-label">Вопрос <span id="current-num" class="text-primary">1</span> из <span
+              id="total-count-quiz">0</span></span> <span class="progress-percent" id="progress-percent">20%</span>
         </div>
         <div class="progress-bar-track">
           <div class="progress-bar-fill" id="progress-fill"></div>
@@ -63,7 +64,7 @@
       <h2 class="results-title">Результат</h2>
       <div class="score-display">
         <span id="score-value" class="score-value">0</span>
-        <span class="score-total"> / 5</span>
+        <span class="score-total"> / <span id="total-count-result">0</span></span>
       </div>
       <div class="glass-card feedback-card">
         <p id="feedback-text" class="feedback-text"></p>
