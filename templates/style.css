@@ -431,6 +431,38 @@ body {
   color: var(--muted-fg);
 }
 
+.code-block {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Consolas', 'Monaco', monospace;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  border: 1px solid #333;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  /* Перенос строк */
+  text-align: left;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Убираем выделение текста, чтобы сложнее было копировать */
+body {
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE10+/Edge */
+  user-select: none;
+  /* Standard */
+}
+
+/* Разрешаем выделение в инпуте имени */
+input {
+  user-select: auto;
+}
+
 @media(max-width:640px) {
   .app {
     padding: 2rem 0.5rem
