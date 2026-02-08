@@ -2,7 +2,6 @@ import sqlite3
 import uuid
 from datetime import datetime
 from fastapi import FastAPI, Request, Response, HTTPException
-# ВОТ ЗДЕСЬ БЫЛА ОШИБКА: Добавили JSONResponse в список
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import os
@@ -35,8 +34,6 @@ class QuizResult(BaseModel):
     max_score: int
     tab_switches: int
 
-# --- Роуты файлов ---
-
 
 @app.get("/", response_class=FileResponse)
 async def read_root():
@@ -52,8 +49,6 @@ async def get_css():
 async def get_js():
     return os.path.join(TEMPLATE_DIR, "script.js")
 
-# --- API ---
-
 
 @app.post("/api/login")
 async def login(user: UserLogin, request: Request, response: Response):
@@ -67,7 +62,6 @@ async def login(user: UserLogin, request: Request, response: Response):
         exists = c.fetchone()
         conn.close()
         if exists:
-            # Теперь JSONResponse импортирован и ошибки не будет
             return JSONResponse(status_code=403, content={"detail": "Вы уже сдали тест. Повторная попытка запрещена."})
 
     if not token:
@@ -138,7 +132,7 @@ async def teacher_stats():
         </style>
     </head>
     <body>
-        <h1>📊 Результаты практики</h1>
+        <h1>Результаты практики</h1>
         <table>
             <tr><th>Студент</th><th>Баллы</th><th>Alt+Tab (раз)</th><th>Время</th></tr>
     """

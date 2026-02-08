@@ -1,7 +1,4 @@
-// --- БАЗА ВОПРОСОВ (30 штук) ---
-// Типы: 0-14 (Норм), 15-19 (Сложные), 20-29 (Код)
 const questions = [
-  // === ТЕОРИЯ (НОРМАЛЬНЫЕ) ===
   { id: 1, q: "Какая составляющая «триады CIA» отвечает за то, что данные не были изменены?", opts: ["Конфиденциальность", "Целостность", "Доступность", "Аутентичность"], c: 1 },
   { id: 2, q: "Что из этого является биометрической аутентификацией?", opts: ["Пароль", "Смарт-карта", "Отпечаток пальца", "Одноразовый код из SMS"], c: 2 },
   { id: 3, q: "Как называется программа, которая шифрует файлы пользователя и требует выкуп?", opts: ["Spyware", "Ransomware", "Adware", "Rootkit"], c: 1 },
@@ -17,15 +14,11 @@ const questions = [
   { id: 13, q: "Какое действие НЕ поможет защититься от вирусов?", opts: ["Обновление ОС", "Использование антивируса", "Открытие всех вложений в почте", "Ограничение прав администратора"], c: 2 },
   { id: 14, q: "Как называется «люк» в программе, оставленный разработчиком для входа?", opts: ["Backdoor", "Frontdoor", "Sidechannel", "Exploit"], c: 0 },
   { id: 15, q: "Какая угроза исходит от обиженного уволенного сотрудника?", opts: ["Внешняя, случайная", "Внутренняя, преднамеренная", "Техногенная", "Внешняя, преднамеренная"], c: 1 },
-
-  // === ТЕОРИЯ (СЛОЖНЫЕ) ===
   { id: 16, q: "Какой тип шифрования использует пару ключей (открытый и закрытый)?", opts: ["Симметричное", "Асимметричное", "Хеширование", "Стенография"], c: 1 },
   { id: 17, q: "Что такое «Zero-day» уязвимость?", opts: ["Уязвимость, которой 0 дней", "Уязвимость, для которой еще нет патча", "Уязвимость, которая не опасна", "Ошибка при установке Windows"], c: 1 },
   { id: 18, q: "Какую атаку предотвращает использование Prepared Statements (подготовленных запросов)?", opts: ["XSS", "SQL Injection", "CSRF", "DDoS"], c: 1 },
   { id: 19, q: "Что делает хеш-функция с паролем?", opts: ["Шифрует его с возможностью расшифровки", "Превращает в необратимую строку фиксированной длины", "Сжимает его для экономии места", "Передает его в открытом виде"], c: 1 },
   { id: 20, q: "Атака «Man-in-the-Middle» (MITM) возможна, если:", opts: ["Используется HTTPS с валидным сертификатом", "Злоумышленник контролирует канал связи (например, публичный Wi-Fi)", "Установлен надежный антивирус", "Пароль слишком длинный"], c: 1 },
-
-  // === ПРАКТИКА (КОД) ===
   { id: 21, code: "SELECT * FROM users WHERE name = '" + "user_input" + "';", q: "Уязвимость в этом коде:", opts: ["XSS", "SQL Injection", "Buffer Overflow", "Race Condition"], c: 1 },
   { id: 22, code: "<script>alert(document.cookie)</script>", q: "Если этот текст попадет на страницу сайта, это пример:", opts: ["SQL Injection", "XSS (Stored/Reflected)", "CSRF", "Brute Force"], c: 1 },
   { id: 23, code: "if (password == 'admin123') { grant_access(); }", q: "В чем главная проблема этого кода?", opts: ["Использование == вместо ===", "Хардкод пароля в коде", "Функция grant_access устарела", "Нет проверки логина"], c: 1 },
@@ -43,12 +36,10 @@ let score = 0;
 let tabSwitches = 0;
 let quizStarted = false;
 
-// --- ЗАЩИТА ОТ ЧИТЕРСТВА ---
 
-// 1. Блокировка контекстного меню
 document.addEventListener('contextmenu', event => event.preventDefault());
 
-// 2. Блокировка F12 и горячих клавиш
+// 1. Блокировка F12 и горячих клавиш
 document.onkeydown = function (e) {
   if (e.key == 123) { // F12
     return false;
@@ -64,12 +55,11 @@ document.onkeydown = function (e) {
   }
 };
 
-// 3. Отслеживание ухода с вкладки
+// 2. Отслеживание ухода с вкладки
 function handleLossOfFocus() {
   if (quizStarted) {
     tabSwitches++;
     document.title = `⚠️ Внимание! (${tabSwitches})`;
-    // Можно покрасить фон в красный на секунду для предупреждения
     document.body.style.backgroundColor = "#3a0000";
     setTimeout(() => document.body.style.backgroundColor = "", 500);
   }
@@ -81,11 +71,9 @@ function handleGainFocus() {
   }
 }
 
-// Срабатывает при Alt+Tab или клике в другое окно
+// Срабатывает при Alt+Tab, сворачивании браузера, переключении вкладки или клике в другое окно
 window.addEventListener("blur", handleLossOfFocus);
 window.addEventListener("focus", handleGainFocus);
-
-// Срабатывает при сворачивании браузера или переключении вкладки
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     handleLossOfFocus();
@@ -94,7 +82,6 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// --- ЛОГИКА ТЕСТА ---
 
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -154,7 +141,7 @@ function startQuiz() {
   }, 1000);
   current = 0;
   score = 0;
-  tabSwitches = 0; // Сброс
+  tabSwitches = 0;
   show('quiz-screen');
   renderQuestion();
 }
@@ -165,12 +152,9 @@ function renderQuestion() {
   const pct = ((current + 1) / questions.length) * 100;
   document.getElementById('progress-percent').textContent = Math.round(pct) + '%';
   document.getElementById('progress-fill').style.width = pct + '%';
-
-  // Обработка текста вопроса
   const qText = document.getElementById('question-text');
   qText.innerHTML = q.q;
 
-  // Если есть блок кода
   if (q.code) {
     qText.innerHTML += `<div class="code-block">${escapeHtml(q.code)}</div>`;
   }
@@ -216,10 +200,10 @@ function selectOption(index) {
     if (current < questions.length) {
       renderQuestion();
     } else {
-      quizStarted = false; // Остановить трекинг
+      quizStarted = false;
       submitAndShowResults();
     }
-  }, 1200); // Чуть быстрее переход
+  }, 1200);
 }
 
 async function submitAndShowResults() {
@@ -241,7 +225,7 @@ async function submitAndShowResults() {
 
 function showResults() {
   show('results-screen');
-  const isHigh = score >= (questions.length * 0.7); // 70% проходной
+  const isHigh = score >= (questions.length * 0.7);
   const pct = Math.round((score / questions.length) * 100);
 
   const sv = document.getElementById('score-value');
@@ -262,16 +246,13 @@ function showResults() {
   setTimeout(() => fill.style.width = pct + '%', 100);
   document.getElementById('result-percent').textContent = pct + '% верно';
 
-  // Убираем кнопку рестарта!
   const restartBtn = document.querySelector('#results-screen .btn-primary');
   if (restartBtn) restartBtn.style.display = 'none';
 }
 
-// --- ИНИЦИАЛИЗАЦИЯ СЧЕТЧИКОВ ---
 function initCounters() {
   const total = questions.length;
 
-  // Обновляем все места в HTML, где должно быть общее количество
   const idsToUpdate = [
     'total-count-subtitle',
     'total-count-meta',
@@ -285,7 +266,5 @@ function initCounters() {
   });
 }
 
-// Запускаем сразу при загрузке скрипта
 document.addEventListener('DOMContentLoaded', initCounters);
-// На случай, если DOMContentLoaded уже прошел (для надежности)
 initCounters();
