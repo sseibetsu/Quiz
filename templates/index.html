@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Квиз: Угрозы и Риски ИБ</title>
+  <meta name="description" content="Интерактивный квиз по информационной безопасности для студентов университета" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="app ambient-bg">
+    <div id="welcome-screen" class="screen active">
+      <div class="icon-container float-anim">
+        <div class="icon-box glass-card soft-glow">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-primary">
+            <path
+              d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+          </svg>
+        </div>
+      </div>
+      <h1 class="title"><span class="text-primary">Квиз:</span> Угрозы и Риски ИБ</h1>
+      <p class="subtitle">Проверь свои знания перед практикой. <span class="text-lavender">5 вопросов</span>, 1 цель —
+        <span class="text-primary">безопасность</span>.</p>
+
+      <div class="input-container">
+        <input type="text" id="username-input" placeholder="Введите Фамилию и Имя" autocomplete="off" />
+      </div>
+
+      <button class="btn-primary soft-glow" onclick="loginAndStart()">Начать →</button>
+
+      <div class="meta-info">
+        <div class="meta-item"><span class="dot dot-primary"></span>5 вопросов</div>
+        <div class="meta-item"><span class="dot dot-accent"></span>Мгновенная проверка</div>
+      </div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+      <div class="progress-container">
+        <div class="progress-header">
+          <span class="progress-label">Вопрос <span id="current-num" class="text-primary">1</span> из 5</span>
+          <span class="progress-percent" id="progress-percent">20%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+      <div class="glass-card question-card">
+        <p id="question-text" class="question-text"></p>
+      </div>
+      <div id="options-container" class="options-container"></div>
+    </div>
+
+    <div id="results-screen" class="screen">
+      <div id="result-icon" class="icon-container">
+        <div id="result-icon-box" class="icon-box glass-card"></div>
+      </div>
+      <h2 class="results-title">Результат</h2>
+      <div class="score-display">
+        <span id="score-value" class="score-value">0</span>
+        <span class="score-total"> / 5</span>
+      </div>
+      <div class="glass-card feedback-card">
+        <p id="feedback-text" class="feedback-text"></p>
+      </div>
+      <div class="result-bar-container">
+        <div class="progress-bar-track">
+          <div id="result-bar-fill" class="progress-bar-fill"></div>
+        </div>
+        <p id="result-percent" class="result-percent"></p>
+      </div>
+      <button class="btn-primary soft-glow" onclick="location.reload()">🔄 Пройти снова</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>
