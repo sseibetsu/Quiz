@@ -2,7 +2,8 @@ import sqlite3
 import uuid
 from datetime import datetime
 from fastapi import FastAPI, Request, Response, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+# ВОТ ЗДЕСЬ БЫЛА ОШИБКА: Добавили JSONResponse в список
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import os
 
@@ -16,7 +17,6 @@ def init_db():
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users 
                  (token TEXT PRIMARY KEY, name TEXT, ip TEXT, created_at TEXT)''')
-    # Добавили поле tab_switches
     c.execute('''CREATE TABLE IF NOT EXISTS results 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, token TEXT, score INTEGER, max_score INTEGER, tab_switches INTEGER, timestamp TEXT)''')
     conn.commit()
@@ -33,7 +33,7 @@ class UserLogin(BaseModel):
 class QuizResult(BaseModel):
     score: int
     max_score: int
-    tab_switches: int  # Новое поле
+    tab_switches: int
 
 # --- Роуты файлов ---
 
@@ -67,7 +67,7 @@ async def login(user: UserLogin, request: Request, response: Response):
         exists = c.fetchone()
         conn.close()
         if exists:
-            # Если результат есть, возвращаем спец. статус
+            # Теперь JSONResponse импортирован и ошибки не будет
             return JSONResponse(status_code=403, content={"detail": "Вы уже сдали тест. Повторная попытка запрещена."})
 
     if not token:
@@ -112,7 +112,6 @@ async def submit_result(result: QuizResult, request: Request):
 async def teacher_stats():
     conn = sqlite3.connect('quiz_results.db')
     c = conn.cursor()
-    # Добавили вывод Alt+Tab
     c.execute('''
         SELECT u.name, r.score, r.max_score, r.tab_switches, r.timestamp 
         FROM results r 
@@ -139,7 +138,7 @@ async def teacher_stats():
         </style>
     </head>
     <body>
-        <h1>Результаты практики</h1>
+        <h1>📊 Результаты практики</h1>
         <table>
             <tr><th>Студент</th><th>Баллы</th><th>Alt+Tab (раз)</th><th>Время</th></tr>
     """
@@ -158,6 +157,4 @@ async def teacher_stats():
 
 if __name__ == "__main__":
     import uvicorn
-    # Импорт JSONResponse нужен был выше, добавим
-    from fastapi.responses import JSONResponse
     uvicorn.run(app, host="0.0.0.0", port=8000)
