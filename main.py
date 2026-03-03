@@ -5,12 +5,12 @@ from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 import os
-from typing import List
+from typing import Dict, Any
 
 app = FastAPI()
-
 TEMPLATE_DIR = "templates"
 
+active_sessions: Dict[str, Dict[str, Any]] = {}
 
 def init_db():
     conn = sqlite3.connect('quiz_results.db')
@@ -22,295 +22,186 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 init_db()
-
 
 class UserLogin(BaseModel):
     name: str
-
-
-class QuizResult(BaseModel):
-    score: int
-    max_score: int
-
 
 class AnswerCheck(BaseModel):
     question_id: int
     selected_index: int
 
+class ViolationData(BaseModel):
+    type: str
 
+# questions
 QUESTIONS = [
     {
         "id": 1,
-        "question": "В чем заключается основное отличие троянской программы от вируса?",
-        "options": ["Способность автономно распространяться по сети", "Маскировка под легитимное ПО и отсутствие способности к самокопированию", "Обязательное шифрование файлов пользователя", "Внедрение своего кода в загрузочный сектор"],
-        "correctIndex": 1
-    },
-    {
-        "id": 2,
-        "question": "Каков принцип действия программ-вымогателей (Ransomware)?",
-        "options": ["Скрытый сбор данных и телеметрии", "Перехват вводимых реквизитов в браузере", "Ограничение доступа к данным путём шифрования с требованием выкупа", "Удаленный доступ и управление системой"],
-        "correctIndex": 2
-    },
-    {
-        "id": 3,
-        "question": "К какой категории вредоносного ПО относятся кейлоггеры и трекеры?",
-        "options": ["Вирусы", "Spyware (Шпионские программы)", "Ransomware", "Руткиты"],
-        "correctIndex": 1
-    },
-    {
-        "id": 4,
-        "question": "Что означает концепция Defense in Depth (Многоуровневая защита)?",
-        "options": ["Комбинирование технических, организационных и процедурных мер", "Использование только проактивных методов", "Изоляция компьютера от интернета", "Использование нескольких антивирусов одновременно"],
+        "question": "...",
+        "options": ["...", "...", "...", "..."],
         "correctIndex": 0
-    },
-    {
-        "id": 5,
-        "question": "В чем главный недостаток сигнатурного анализа?",
-        "options": ["Высокая нагрузка на процессор", "Неэффективен против ранее неизвестных (0-day) угроз", "Сложность в настройке", "Высокое число ложных срабатываний"],
-        "correctIndex": 1
-    },
-    {
-        "id": 6,
-        "question": "Какое правило рекомендуется использовать для хранения резервных копий (бэкапов)?",
-        "options": ["Правило 1-2-3", "Правило 3-2-1", "Правило 5-4-1", "Правило 2-2-2"],
-        "correctIndex": 1
-    },
-    {
-        "id": 7,
-        "question": "Какую уязвимость эксплуатировал известный вирус-шифровальщик WannaCry?",
-        "options": ["Уязвимость RDP", "Уязвимость SQL-инъекции", "Уязвимость SMB", "Уязвимость нулевого дня в браузерах"],
-        "correctIndex": 2
-    },
-    {
-        "id": 8,
-        "question": "Что означает 'двойное вымогательство' при атаке Ransomware?",
-        "options": ["Требование выкупа дважды на разные кошельки", "Шифрование данных и угроза публикации похищенной информации", "Блокировка системы и заражение локальной сети", "Удаление бэкапов и шифрование диска"],
-        "correctIndex": 1
-    },
-    {
-        "id": 9,
-        "question": "Какой механизм работы характерен для банковских троянов (Banking trojan)?",
-        "options": ["Удаление антивируса", "Саморазмножение по сети", "Инжекции в браузер и перехват вводимых реквизитов", "Шифрование базы данных"],
-        "correctIndex": 2
-    },
-    {
-        "id": 10,
-        "question": "Что из перечисленного относится к базовым организационным мерам защиты?",
-        "options": ["Установка межсетевого экрана (Firewall)", "Внедрение строгой политики паролей", "Использование песочниц (Sandboxing)", "Поведенческий мониторинг"],
-        "correctIndex": 1
-    },
-    {
-        "id": 11,
-        "question": "Какая задача у компонента 'Карантин' в современном антивирусе?",
-        "options": ["Фильтрация входящего трафика", "Сканирование процессов в памяти", "Изоляция и анализ подозрительных объектов", "Блокировка фишинговых ссылок"],
-        "correctIndex": 2
-    },
-    {
-        "id": 12,
-        "question": "Как в основном распространяются сетевые черви?",
-        "options": ["Через пиратские диски", "Требуют активного участия пользователя", "Автономно по уязвимым сервисам сети", "Только через зараженные USB-накопители"],
-        "correctIndex": 2
-    },
-    {
-        "id": 13,
-        "question": "Что отслеживает эвристический анализ в антивирусных решениях?",
-        "options": ["Отклонения в исполнении программ (необычные вызовы API, сеть)", "Совпадение хэшей файлов с базой данных", "Тексты входящих писем", "Наличие сложных паролей у пользователей"],
-        "correctIndex": 0
-    },
-    {
-        "id": 14,
-        "question": "Какова основная функция трояна типа Downloader?",
-        "options": ["Постоянный удаленный доступ", "Скачивание и установка вторичных полезных нагрузок", "Извлечение метаданных", "Сбор коммерческих секретов"],
-        "correctIndex": 1
-    },
-    {
-        "id": 15,
-        "question": "Каким должно быть первое действие при подозрении на заражение узла?",
-        "options": ["Запуск полного сканирования системы", "Немедленная изоляция пострадавшего узла от сети", "Попытка удалить вирус вручную", "Выключение питания из розетки"],
-        "correctIndex": 1
-    },
-
-    {
-        "id": 16,
-        "question": "Какие методы часто применяют шпионские программы (Spyware) для глубокой маскировки?",
-        "options": ["Отключение брандмауэра Windows", "Маскировка под процессы антивируса", "Использование руткитов и шифрование каналов связи с C2", "Полиморфизм и метаморфизм кода"],
-        "correctIndex": 2
-    },
-    {
-        "id": 17,
-        "question": "В чем заключается принципиальное отличие EDR-решений от классических антивирусов?",
-        "options": ["EDR работает без подключения к интернету", "EDR использует только сигнатурный анализ", "Фокус на поведенческом анализе, контекстной телеметрии и средствах расследования", "EDR не требует обновлений"],
-        "correctIndex": 2
-    },
-    {
-        "id": 18,
-        "question": "Какая криптографическая схема обычно используется современным Ransomware для обеспечения надежной блокировки?",
-        "options": ["Только симметричное шифрование", "Комбинация симметричных и асимметричных ключей", "Стеганография", "Исключительно хэширование файлов (MD5, SHA-256)"],
-        "correctIndex": 1
-    },
-    {
-        "id": 19,
-        "question": "Что из нижеперечисленного НЕ относится к техническим мерам защиты?",
-        "options": ["Patch Management", "Sandboxing вложений", "Принцип наименьших привилегий", "SPF/DKIM/DMARC"],
-        "correctIndex": 2
-    },
-    {
-        "id": 20,
-        "question": "Каков классический вектор многослойной современной атаки согласно лекции?",
-        "options": ["Spyware -> Virus -> Rootkit", "Trojan -> Spyware -> Ransomware", "Worm -> Downloader -> Trojan", "Phishing -> DDoS -> Ransomware"],
-        "correctIndex": 1
-    },
-    {
-        "id": 21,
-        "question": "Какая деструктивная особенность отличала атаку NotPetya от классического Ransomware?",
-        "options": ["Маскировка под шифровальщик с целью необратимого саботажа инфраструктуры", "Заражение исключительно домашних ПК", "Отказ от использования уязвимости SMB", "Требование выкупа в фиатной валюте"],
-        "correctIndex": 0
-    },
-    {
-        "id": 22,
-        "question": "Какие технологии входят в современную техническую защиту электронной почты?",
-        "options": ["IPsec и VPN", "SPF/DKIM/DMARC, Sandboxing и URL-rewriting", "IDS и IPS сигнатуры", "Только локальный спам-фильтр в почтовом клиенте"],
-        "correctIndex": 1
-    },
-    {
-        "id": 23,
-        "question": "Что регламентирует цифра '1' в правиле бэкапов 3-2-1?",
-        "options": ["Необходимо иметь один полный бэкап сервера", "Одна копия должна быть недоступна по сети (оффлайн)", "Проверка бэкапа должна проводиться раз в 1 месяц", "Требуется хотя бы один облачный провайдер"],
-        "correctIndex": 1
-    },
-    {
-        "id": 24,
-        "question": "Какие процессы относятся исключительно к реактивному подходу в информационной безопасности?",
-        "options": ["Патч-менеджмент и оценка уязвимостей", "Обучение персонала и харденинг", "Мониторинг, расследование инцидентов и восстановление из резервных копий", "Ограничение привилегий и сегментация сети"],
-        "correctIndex": 2
-    },
-    {
-        "id": 25,
-        "question": "Какова основная задача машинного обучения в рамках продвинутого обнаружения угроз?",
-        "options": ["Обновление сигнатурных баз", "Генерация отчетов для руководства", "Построение базовой модели поведения и поиск аномалий в телеметрии", "Шифрование исходящего трафика"],
-        "correctIndex": 2
     }
 ]
-
 
 @app.get("/", response_class=FileResponse)
 async def read_root():
     return os.path.join(TEMPLATE_DIR, "index.html")
 
-
 @app.get("/style.css", response_class=FileResponse)
 async def get_css():
     return os.path.join(TEMPLATE_DIR, "style.css")
-
 
 @app.get("/script.js", response_class=FileResponse)
 async def get_js():
     return os.path.join(TEMPLATE_DIR, "script.js")
 
-
 @app.post("/api/login")
 async def login(user: UserLogin, request: Request, response: Response):
     token = request.cookies.get("student_token")
-    if not token:
-        token = str(uuid.uuid4())
-
     client_ip = request.client.host
-
+    
     conn = sqlite3.connect('quiz_results.db')
     c = conn.cursor()
-    c.execute("INSERT OR REPLACE INTO users (token, name, ip, created_at) VALUES (?, ?, ?, ?)",
+    
+    # saving token to not let student pass the test more than 1 time
+    if token:
+        c.execute("SELECT score FROM results WHERE token = ?", (token,))
+        if c.fetchone():
+            conn.close()
+            return {"status": "error", "message": "Вы уже сдали этот тест. Повторное прохождение и смена имени запрещены."}
+
+    if not token:
+        token = str(uuid.uuid4())
+        response.set_cookie(key="student_token", value=token, max_age=31536000, httponly=True)
+
+    c.execute("INSERT OR IGNORE INTO users (token, name, ip, created_at) VALUES (?, ?, ?, ?)",
               (token, user.name, client_ip, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     conn.commit()
     conn.close()
 
-    response.set_cookie(key="student_token", value=token, max_age=31536000)
-    return {"status": "ok", "token": token}
+    # session for live watching
+    active_sessions[token] = {
+        "name": user.name,
+        "ip": client_ip,
+        "current_question": 0,
+        "score": 0,
+        "violations": 0,
+        "status": "В процессе"
+    }
 
+    return {"status": "ok", "token": token, "total_questions": len(QUESTIONS)}
 
-@app.get("/api/questions")
-async def get_questions():
-    safe_questions = [
-        {"id": q["id"], "question": q["question"], "options": q["options"]}
-        for q in QUESTIONS
-    ]
-    return safe_questions
+@app.get("/api/question/{index}")
+async def get_question(index: int, request: Request):
+    token = request.cookies.get("student_token")
+    if index < 0 or index >= len(QUESTIONS):
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
+    
 
+    if token in active_sessions:
+        active_sessions[token]["current_question"] = index + 1
+        
+    q = QUESTIONS[index]
+    return {"id": q["id"], "question": q["question"], "options": q["options"]}
 
 @app.post("/api/check")
-async def check_answer(answer: AnswerCheck):
-    question = next(
-        (q for q in QUESTIONS if q["id"] == answer.question_id), None)
+async def check_answer(answer: AnswerCheck, request: Request):
+    token = request.cookies.get("student_token")
+    question = next((q for q in QUESTIONS if q["id"] == answer.question_id), None)
+    
     if not question:
         raise HTTPException(status_code=404, detail="Вопрос не найден")
 
     is_correct = question["correctIndex"] == answer.selected_index
-    return {
-        "correct": is_correct,
-        "correctIndex": question["correctIndex"]
-    }
+    
+    if is_correct and token in active_sessions:
+        active_sessions[token]["score"] += 1
 
+    return {"correct": is_correct, "correctIndex": question["correctIndex"]}
+
+@app.post("/api/violation")
+async def log_violation(data: ViolationData, request: Request):
+    token = request.cookies.get("student_token")
+    if token in active_sessions:
+        active_sessions[token]["violations"] += 1
+    return {"status": "ok"}
 
 @app.post("/api/submit")
-async def submit_result(result: QuizResult, request: Request):
+async def submit_result(request: Request):
     token = request.cookies.get("student_token")
-    if not token:
-        token = "anonymous_" + str(uuid.uuid4())
+    if not token or token not in active_sessions:
+        raise HTTPException(status_code=400, detail="Сессия не найдена")
+
+    session = active_sessions[token]
+    score = session["score"]
+    max_score = len(QUESTIONS)
 
     conn = sqlite3.connect('quiz_results.db')
     c = conn.cursor()
     c.execute("INSERT INTO results (token, score, max_score, timestamp) VALUES (?, ?, ?, ?)",
-              (token, result.score, result.max_score, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+              (token, score, max_score, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     conn.commit()
     conn.close()
-    return {"status": "saved"}
-
+    
+    session["status"] = "Завершен"
+    return {"status": "saved", "score": score, "max_score": max_score}
 
 @app.get("/teacher", response_class=HTMLResponse)
 async def teacher_stats():
     conn = sqlite3.connect('quiz_results.db')
     c = conn.cursor()
     c.execute('''
-        SELECT u.name, r.score, r.max_score, r.timestamp, u.ip 
+        SELECT u.name, r.score, r.max_score, r.timestamp, u.ip, r.token 
         FROM results r 
         LEFT JOIN users u ON r.token = u.token 
         ORDER BY r.timestamp DESC
     ''')
-    rows = c.fetchall()
+    finished_rows = c.fetchall()
     conn.close()
 
     html = """
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Результаты студентов</title>
+        <title>Панель преподавателя</title>
         <meta charset="utf-8">
+        <meta http-equiv="refresh" content="3"> 
         <style>
             body { font-family: monospace; padding: 20px; background: #121212; color: #e0e0e0; }
-            h1 { color: #bb86fc; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+            h1, h2 { color: #bb86fc; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
             th, td { border: 1px solid #333; padding: 12px; text-align: left; }
             th { background: #1f1b24; color: #03dac6; }
             tr:nth-child(even) { background: #1a1a1a; }
-            tr:hover { background: #2c2c2c; }
-            .score { font-weight: bold; }
+            .danger { color: #ff5555; font-weight: bold; }
         </style>
     </head>
     <body>
-        <h1>Журнал результатов</h1>
+        <h1>В реальном времени (пишут сейчас)</h1>
         <table>
-            <tr><th>Имя студента</th><th>Результат</th><th>Время сдачи</th><th>IP адрес</th></tr>
+            <tr><th>Студент</th><th>IP</th><th>Вопрос</th><th>Алерты (Alt-Tab/F12)</th><th>Статус</th></tr>
     """
-    for row in rows:
+    for token, data in active_sessions.items():
+        if data["status"] == "В процессе":
+            viol_class = "danger" if data["violations"] > 0 else ""
+            html += f"<tr><td>{data['name']}</td><td>{data['ip']}</td><td>{data['current_question']} / {len(QUESTIONS)}</td><td class='{viol_class}'>{data['violations']}</td><td>{data['status']}</td></tr>"
+            
+    html += """
+        </table>
+        <h2>Завершенные работы</h2>
+        <table>
+            <tr><th>Имя</th><th>Результат</th><th>Алерты</th><th>Время сдачи</th><th>IP адрес</th></tr>
+    """
+    for row in finished_rows:
         name = row[0] if row[0] else "Аноним"
-
-        score = row[1]
-        max_score = row[2]
-        percentage = (score / max_score) * 100 if max_score > 0 else 0
+        violations = active_sessions.get(row[5], {}).get("violations", "0 (до обновы)")
+        viol_class = "danger" if str(violations) != "0" and str(violations) != "0 (до обновы)" else ""
+        percentage = (row[1] / row[2]) * 100 if row[2] > 0 else 0
         score_color = "#03dac6" if percentage >= 80 else "#cf6679"
+        
+        html += f"<tr><td>{name}</td><td style='color:{score_color}; font-weight:bold'>{row[1]} / {row[2]}</td><td class='{viol_class}'>{violations}</td><td>{row[3]}</td><td>{row[4]}</td></tr>"
 
-        html += f"<tr><td>{name}</td><td class='score' style='color:{score_color}'>{score} / {max_score}</td><td>{row[3]}</td><td>{row[4]}</td></tr>"
     html += "</table></body></html>"
     return html
 
